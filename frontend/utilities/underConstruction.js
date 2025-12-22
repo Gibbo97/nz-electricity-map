@@ -26,7 +26,7 @@ export const underConstruction = [
         "costMillionDollars": 220,
         "capacityMW": 46,
         "yearlyGenerationGWh": 390,
-        "openBy": "2025-12-30",
+        "openBy": "2026-01-31",
         "link": "https://www.mercury.co.nz/about-us/renewable-energy/geothermal/nga-tamariki-expansion"
     },
     {
@@ -208,7 +208,7 @@ export const underConstruction = [
         "name": "Rānui",
         "fuel": "Solar",
         "status": "Under Construction",
-        "openBy": "2026-01-31",
+        "openBy": "2026-03-31",
         "operator": "Rānui Solar Ltd",
         "capacityMW": 12.6,
         "capacityMWp": 14.6,
