@@ -43,23 +43,6 @@ export const underConstruction = [
         "link": "https://www.mercury.co.nz/about-us/renewable-energy/wind-generation/kaiwera-downs-wind-farm"
     },
     {
-        "name": "Twin Rivers",
-        "site": "TRS",
-        "substation": "Kaikohe",
-        "fuel": "Solar",
-        "operator": "Rānui Generation",
-        "status": "Commissioning",
-        "capacityMWp": 31,
-        "capacityMW": 24,
-        "yearlyGenerationGWh": 42,
-        "openBy": "2025-12-30",
-        "location": {
-            "lat": -35.13850578292899,
-            "long": 173.35440957656024
-        },
-        "link": "https://ranuigen.co.nz/twinrivers/"
-    },
-    {
         "name": "Roxburgh",
         "locationDescription": "Turbine 3 Upgrade",
         "site": "ROX",
@@ -78,23 +61,6 @@ export const underConstruction = [
         "status": "Committed",
         "yearlyGenerationGWh": 11,
         "link": "https://contact.co.nz/aboutus/media-centre/2024/06/09/new-turbines-at-contacts-roxburgh-dam"
-    },
-    {
-        "name": "Pāmu Rā ki Whitianga",
-        "site": "WTA",
-        "substation": "Kopu",
-        "fuel": "Solar",
-        "operator": "Lodestone Energy",
-        "status": "Commissioning",
-        "capacityMW": 29,
-        "capacityMWp": 33,
-        "openBy": "2025-12-30",
-        "yearlyGenerationGWh": 49,
-        "location": {
-            "lat": -36.851852353029905,
-            "long": 175.66313578186515
-        },
-        "link": "https://lodestoneenergy.co.nz/whitianga-solar-farm/"
     },
     {
         "name": "TOPP2",
