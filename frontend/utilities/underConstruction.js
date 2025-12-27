@@ -294,5 +294,18 @@ export const underConstruction = [
             "long":172.8166609356564
         },
         "link": "https://www.yinsonrenewables.co.nz/project-sites-mt-cass/"
+    },
+    {
+        "name": "Dannevirke",
+        "fuel": "Solar",
+        "operator": "BrightFern Energy",
+        "status": "Under Construction",
+        "capacityMWp": 23,
+        "openBy": "2026-04-30",
+        "location": {
+            "lat": -40.19329473785136,
+            "long": 176.03669826644835
+        },
+        "link": "https://www.gamechangesolar.com/news/gamechange-solar-expands-into-new-zealand-with-bright-fern-energy-s-dannevirke-solar-farm"
     }
 ]
