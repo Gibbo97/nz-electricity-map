@@ -205,19 +205,6 @@ export const underConstruction = [
         "link": "https://lodestoneenergy.co.nz/canterbury-solar-farm-project-underway/"
     },
     {
-        "name": "Rānui",
-        "fuel": "Solar",
-        "status": "Under Construction",
-        "openBy": "2026-03-31",
-        "operator": "Rānui Solar Ltd",
-        "capacityMW": 12.6,
-        "capacityMWp": 14.6,
-        "location": {
-            "lat": -41.52712321897282, 
-            "long": 173.9952796707943
-        }
-    },
-    {
         "name": "Omeheu",
         "site": "EDS",
         "substation": "Edgecumbe",
