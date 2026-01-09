@@ -32,20 +32,51 @@ export default {
 				return Response.json(results.results, { headers: corsHeaders });
 			}
 
-			// GET /v1/offers/trading-period?date=2025-12-30&period=1
-			if (url.pathname === '/v1/offers/trading-period') {
-				const date = url.searchParams.get('date');
-				const period = url.searchParams.get('period');
-
-				if (!date || !period) {
-					return Response.json({ error: 'Missing date or period parameter' }, { status: 400, headers: corsHeaders });
-				}
+			// GET /v1/offers/date/:date
+			// Example: /v1/offers/date/2025-12-30
+			if (url.pathname.startsWith('/v1/offers/date/')) {
+				const date = url.pathname.split('/').pop();
 
 				const results = await env.OFFERS_DB.prepare(
-					'SELECT * FROM offers WHERE TradingDate = ? AND TradingPeriod = ? ORDER BY PointOfConnection, Unit, Tranche'
-				).bind(date, parseInt(period)).all();
+					'SELECT TradingPeriod, Site, Unit, Tranche, Megawatts, DollarsPerMegawattHour FROM offers WHERE TradingDate = ? ORDER BY TradingPeriod, Site, Unit, Tranche'
+				).bind(date).all();
 
-				return Response.json(results.results, { headers: corsHeaders });
+				// Transform to grouped format: { timestamp: [{ site, unit, tranches: [...] }] }
+				const grouped = {};
+
+				for (const row of results.results) {
+					// Convert trading period (1-48) to timestamp
+					// Period 1 = 00:00-00:30, Period 2 = 00:30-01:00, etc.
+					const periodStart = (row.TradingPeriod - 1) * 30;
+					const hours = Math.floor(periodStart / 60);
+					const minutes = periodStart % 60;
+					const timestamp = `${date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+
+					// Initialize timestamp group if needed
+					if (!grouped[timestamp]) {
+						grouped[timestamp] = [];
+					}
+
+					// Find or create site/unit entry
+					let siteEntry = grouped[timestamp].find(s => s.site === row.Site && s.unit === row.Unit);
+					if (!siteEntry) {
+						siteEntry = {
+							site: row.Site,
+							unit: row.Unit,
+							tranches: []
+						};
+						grouped[timestamp].push(siteEntry);
+					}
+
+					// Add tranche
+					siteEntry.tranches.push({
+						tranche: row.Tranche,
+						megawatts: row.Megawatts,
+						price: row.DollarsPerMegawattHour
+					});
+				}
+
+				return Response.json(grouped, { headers: corsHeaders });
 			}
 
 			// GET /v1/offers/poc/:poc
@@ -56,6 +87,22 @@ export default {
 				const results = await env.OFFERS_DB.prepare(
 					'SELECT * FROM offers WHERE PointOfConnection = ? ORDER BY TradingDate, TradingPeriod, Tranche LIMIT 100'
 				).bind(poc).all();
+
+				return Response.json(results.results, { headers: corsHeaders });
+			}
+
+			// GET /v1/offers/generator?unit=TST0&date=2025-12-30
+			if (url.pathname === '/v1/offers/generator') {
+				const unit = url.searchParams.get('unit');
+				const date = url.searchParams.get('date');
+
+				if (!unit || !date) {
+					return Response.json({ error: 'Missing unit or date parameter' }, { status: 400, headers: corsHeaders });
+				}
+
+				const results = await env.OFFERS_DB.prepare(
+					'SELECT * FROM offers WHERE Unit = ? AND TradingDate = ? ORDER BY TradingPeriod, Tranche'
+				).bind(unit, date).all();
 
 				return Response.json(results.results, { headers: corsHeaders });
 			}
@@ -76,8 +123,9 @@ export default {
 				message: 'NZ Electricity Map - Offers API',
 				endpoints: [
 					'GET /v1/offers/unit/:unitCode',
-					'GET /v1/offers/trading-period?date=YYYY-MM-DD&period=N',
+					'GET /v1/offers/date/:date',
 					'GET /v1/offers/poc/:pointOfConnection',
+					'GET /v1/offers/generator?unit=UNIT&date=YYYY-MM-DD',
 					'GET /v1/offers/stats'
 				]
 			}, { headers: corsHeaders });

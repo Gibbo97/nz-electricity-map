@@ -18,7 +18,7 @@ def __init__():
     substationDescriptions = SubstationDescriptions()
     realTimeDispatch = RealTimeDispatch()
     outages = Outages()
-    offers = Offers()
+    offers = Offers(genDesc)
     
     liveGenerators = LiveGenerators(genDesc, realTimeDispatch, outages)
     liveGenData = liveGenerators.getLiveGeneratorOutput()
