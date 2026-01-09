@@ -6,6 +6,8 @@ import datetime
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from io import StringIO
+from services.GeneratorDescriptions import GeneratorDescriptions
+
 
 OFFERS_LOOKBACK_DAYS = 7
 
@@ -15,7 +17,9 @@ offersXML = 'https://emidatasets.blob.core.windows.net/publicdata?restype=contai
 apiKey = os.environ['EMI_API_KEY']
 
 class Offers:
-    def __init__(self, existingResponse = []) -> None:
+    def __init__(self, generatorDescriptions: GeneratorDescriptions, existingResponse = []) -> None:
+        self.generatorDescriptions = generatorDescriptions
+
         Path("output").mkdir(parents=True, exist_ok=True)
         self._createTable()
 
@@ -53,6 +57,7 @@ class Offers:
             CREATE TABLE IF NOT EXISTS offers (
                 TradingDate TEXT,
                 TradingPeriod INTEGER,
+                Site TEXT,
                 ParticipantCode TEXT,
                 PointOfConnection TEXT,
                 Unit TEXT,
@@ -122,10 +127,14 @@ class Offers:
         csv_reader = csv.DictReader(StringIO(csv_string))
 
         for row in csv_reader:
-            if row['IsLatestYesNo'] == 'Y':
+            if row['IsLatestYesNo'] == 'Y' and row['ProductClass'] == 'Injection' and row['ProductType'] == 'Energy':
+                nodeAndUnit = row['PointOfConnection'] + " " + row['Unit']
+                generatorDescription = self.generatorDescriptions.getByPointOfConnection(nodeAndUnit)
+                site = generatorDescription['site']
                 rows_to_insert.append((
                     row['TradingDate'],
                     int(row['TradingPeriod']),
+                    site,
                     row['ParticipantCode'],
                     row['PointOfConnection'],
                     row['Unit'],
@@ -149,7 +158,7 @@ class Offers:
 
         cursor.executemany('''
             INSERT OR REPLACE INTO offers VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         ''', rows_to_insert)
 
