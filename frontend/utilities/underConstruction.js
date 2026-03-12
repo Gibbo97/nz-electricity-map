@@ -5,7 +5,7 @@ export const underConstruction = [
         "substation": "Glenbrook",
         "fuel": "Battery",
         "operator": "Contact Energy",
-        "status": "Pre-Commissioning",
+        "status": "Commissioning",
         "costMillionDollars": 163,
         "capacityMW": 100,
         "capacityMWh": 200,
