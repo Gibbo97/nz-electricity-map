@@ -211,10 +211,10 @@ export const underConstruction = [
         "link": "https://www.waikatotimes.co.nz/nz-news/350327125/nzs-largest-solar-farm-gets-go-ahead"
     },
     {
-        "name": "Edgecumbe",
+        "name": "Tihori",
         "fuel": "Solar",
         "operator": "Genesis Energy",
-        "status": "Committed",
+        "status": "Under Construction",
         "capacityMWp": 136,
         "yearlyGenerationGWh": 238,
         "openBy": "2027-06-31",
