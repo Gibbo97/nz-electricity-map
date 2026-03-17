@@ -61,7 +61,7 @@ async function getStats() {
     const generationDataResponse = await fetch('https://api.electricitymap.frenchsta.gg/v1/dispatch/legacy/generators');
     const generationData = await generationDataResponse.json();
 
-    const substationDataResponse = await fetch('https://api.frenchsta.gg/v1/nzgrid');
+    const substationDataResponse = await fetch('https://api.electricitymap.frenchsta.gg/v1/dispatch/legacy/nzgrid');
     const substationData = await substationDataResponse.json();;
 
     let demandSummaryMap = new Map();
