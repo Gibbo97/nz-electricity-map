@@ -251,7 +251,8 @@ function setNavStatus(value){
 }
 
 async function getSubstationData(substationLayer) {
-    const substationData = await getLiveSubstationData();
+    const substationDataResponse = await fetch('https://api.electricitymap.frenchsta.gg/v1/dispatch/legacy/nzgrid');
+    const substationData = await substationDataResponse.json();
     
     updateSubstationMap(substationData, substationLayer);
 }
