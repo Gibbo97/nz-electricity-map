@@ -104,6 +104,13 @@ function setStationDropdown(allOfferData, liveGenData, operatorToFilterTo = []) 
 
         siteFilterDropdown.appendChild(opt);
     });
+
+    // Set selected value from URL if present
+    const searchParams = new URLSearchParams(window.location.search);
+    const selectedSite = searchParams.get("site");
+    if (selectedSite) {
+        siteFilterDropdown.value = selectedSite;
+    }
 }
 
 function setTradingPeriodDropdown() {
@@ -339,6 +346,13 @@ function updateSupplyCurve() {
     });
 
     statusSpan.innerHTML = `Showing Trading Period ${tradingPeriodFilterTo}`;
+}
+
+// Show back button if redirected from map
+var redirect = (new URLSearchParams(window.location.search)).get("redirect");
+var backButton = document.getElementById("back-link");
+if (redirect) {
+    backButton.style.display = "block";
 }
 
 // Initialize

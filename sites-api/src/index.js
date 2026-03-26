@@ -1,6 +1,6 @@
 /**
  * NZ Electricity Map - Offers API
- * Serves offer data from D1 database
+ * Serves offer data from S3
  */
 
 export default {
@@ -21,69 +21,32 @@ export default {
 
 		try {
 			// GET /v1/offers/date?date=2025-12-30
-			// Example: /v1/offers/date?date=2025-12-30
-			// If date not provided, returns latest available day
+			// If date not provided (or not found), returns latest available day
 			if (url.pathname === '/v1/offers/date') {
-				let date = url.searchParams.get('date');
+				const s3Base = env.S3_BUCKET_URL;
 
-				if (date) {
-					const dateExists = await env.OFFERS_DB.prepare(
-						'SELECT 1 FROM offers WHERE TradingDate = ? LIMIT 1'
-					).bind(date).first();
-
-					if (!dateExists) {
-						const latestDateResult = await env.OFFERS_DB.prepare(
-							'SELECT MAX(TradingDate) as latest FROM offers'
-						).first();
-						date = latestDateResult.latest;
-					}
-				} else {
-					const latestDateResult = await env.OFFERS_DB.prepare(
-						'SELECT MAX(TradingDate) as latest FROM offers'
-					).first();
-					date = latestDateResult.latest;
+				const metaResp = await fetch(`${s3Base}/offers/metadata.json`);
+				if (!metaResp.ok) {
+					return Response.json({ error: 'Offers metadata unavailable' }, { status: 503, headers: corsHeaders });
 				}
+				const metadata = await metaResp.json();
 
-				const results = await env.OFFERS_DB.prepare(
-					'SELECT TradingPeriod, Site, Unit, Tranche, Megawatts, DollarsPerMegawattHour FROM offers WHERE TradingDate = ? ORDER BY TradingPeriod, Site, Unit, Tranche'
-				).bind(date).all();
-
-				// Transform to grouped format: { timestamp: [{ site, unit, tranches: [...] }] }
-				const grouped = {};
-
-				for (const row of results.results) {
-					// Convert trading period (1-48) to timestamp
-					// Period 1 = 00:00-00:30, Period 2 = 00:30-01:00, etc.
-					const periodStart = (row.TradingPeriod - 1) * 30;
-					const hours = Math.floor(periodStart / 60);
-					const minutes = periodStart % 60;
-					const timestamp = `${date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
-
-					// Initialize timestamp group if needed
-					if (!grouped[timestamp]) {
-						grouped[timestamp] = [];
-					}
-
-					// Find or create site/unit entry
-					let siteEntry = grouped[timestamp].find(s => s.site === row.Site && s.unit === row.Unit);
-					if (!siteEntry) {
-						siteEntry = {
-							site: row.Site,
-							unit: row.Unit,
-							tranches: []
-						};
-						grouped[timestamp].push(siteEntry);
-					}
-
-					// Add tranche
-					siteEntry.tranches.push({
-						tranche: row.Tranche,
-						megawatts: row.Megawatts,
-						price: row.DollarsPerMegawattHour
-					});
+				const sortedDates = Object.keys(metadata).sort();
+				if (sortedDates.length === 0) {
+					return Response.json({ error: 'No offer data available' }, { status: 404, headers: corsHeaders });
 				}
+				const latestDate = sortedDates[sortedDates.length - 1];
 
-				return Response.json(grouped, { headers: corsHeaders });
+				const requestedDate = url.searchParams.get('date');
+				const targetDate = (requestedDate && metadata[requestedDate]) ? requestedDate : latestDate;
+
+				const dataResp = await fetch(`${s3Base}/offers/${targetDate}.json`);
+				if (!dataResp.ok) {
+					return Response.json({ error: 'Offer data not found' }, { status: 404, headers: corsHeaders });
+				}
+				const data = await dataResp.json();
+
+				return Response.json(data, { headers: corsHeaders });
 			}
 
 			// Default response
